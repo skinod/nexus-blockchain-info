@@ -1,0 +1,14 @@
+*.DS_Store
+.*.sw[po]
+*.bak
+*.BAK
+*~
+*.orig
+*.class
+.cvsignore
+Thumbs.db
+*.py[co]
+_darcs/*
+CVS/*
+.svn/*
+RCS/*

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<hookexport>
+  <hookdata>
+    <config>
+      <hook_name>Blockchain.info Receive Payments</hook_name>
+      <hook_desc>Blockchain.info nexus gateway</hook_desc>
+      <hook_author>mr.wosi</hook_author>
+      <hook_email>wolaws@gmail.com</hook_email>
+      <hook_website>skinod.com</hook_website>
+      <hook_update_check/>
+      <hook_requirements><![CDATA[a:3:{s:21:"required_applications";a:0:{}s:20:"hook_php_version_min";s:0:"";s:20:"hook_php_version_max";s:0:"";}]]></hook_requirements>
+      <hook_version_human>1.0.0</hook_version_human>
+      <hook_version_long>1000</hook_version_long>
+      <hook_extra_data><![CDATA[a:4:{s:7:"display";a:3:{s:6:"custom";s:32:"install_bci_receive_payments.php";s:8:"language";s:368:"From nexus_public_gateways: gateway_desc_bci_receive_payments_confirn_number, gateway_title_bci_receive_payments_confirn_number, gateway_title_bci_receive_payments_fixed_price, gateway_title_bci_receive_payments_show_qr, gateway_title_bci_receive_payments_use_online_ex, gateway_title_bci_receive_payments_wallet_addr<br />From nexus_public_nexus: sod_bci_send_payment";s:9:"templates";s:41:"From skin_nexus_payments: sod_bci_payment";}s:6:"custom";s:24:"bci_receive_payments.php";s:8:"language";a:2:{s:21:"nexus_public_gateways";a:6:{i:0;s:48:"gateway_desc_bci_receive_payments_confirn_number";i:1;s:49:"gateway_title_bci_receive_payments_confirn_number";i:2;s:46:"gateway_title_bci_receive_payments_fixed_price";i:3;s:42:"gateway_title_bci_receive_payments_show_qr";i:4;s:48:"gateway_title_bci_receive_payments_use_online_ex";i:5;s:46:"gateway_title_bci_receive_payments_wallet_addr";}s:18:"nexus_public_nexus";a:1:{i:0;s:20:"sod_bci_send_payment";}}s:9:"templates";a:1:{s:19:"skin_nexus_payments";a:1:{i:0;s:15:"sod_bci_payment";}}}]]></hook_extra_data>
+      <hook_key>bci_receive_payments</hook_key>
+      <hook_global_caches/>
+    </config>
+  </hookdata>
+  <hookfiles>
+    <file>
+      <hook_file_real>sod_bci_receive_payments_output.php</hook_file_real>
+      <hook_type>libraryHooks</hook_type>
+      <hook_classname>sod_bci_receive_payments_output</hook_classname>
+      <hook_data><![CDATA[a:8:{s:12:"dataLocation";s:0:"";s:14:"libApplication";s:4:"core";s:15:"classToOverload";s:6:"output";s:9:"skinGroup";N;s:12:"skinFunction";N;s:4:"type";N;s:2:"id";N;s:8:"position";N;}]]></hook_data>
+      <hooks_source><![CDATA[<?php
+class sod_bci_receive_payments_output extends (~extends~) {
+	public function sendOutput( $return=false ) {
+		if(
+				$this->request['app'] == 'nexus'
+			&&	$this->request['module'] == 'payments'
+			&&	$this->request['section'] == 'receive'
+			&&	$this->request['validate'] == 'bci_receive_payments'
+		) {
+			if(gateway_bci_receive_payments::$isItTrue === TRUE) {
+				$this->registry->output->outputFormatClass->setHeaderCode( 200 );
+				$this->registry->output->outputFormatClass->printHeader();
+				echo "*ok*";
+				exit();
+			}
+		}
+		return parent::sendOutput( $return );
+	}
+}]]></hooks_source>
+    </file>
+  </hookfiles>
+  <hookextras_custom>
+    <file>
+      <filename>bci_receive_payments.php</filename>
+      <source><![CDATA[<?php
+class bci_receive_payments {
+
+	protected $registry;
+	protected $DB;
+	protected $cache;
+	protected $caches;
+	
+	public function __construct( ipsRegistry $registry ) {
+		// init
+		$this->registry		=  $registry;
+		$this->DB			=  $this->registry->DB();
+		$this->cache		=  $this->registry->cache();
+		$this->caches		=& $this->registry->cache()->fetchCaches();
+	}
+	
+	public function install() {
+		if($this->DB->checkForTable('nexus_gateways')) {
+			$this->DB->replace('nexus_gateways', array(
+				'g_key'			=> 'bci_receive_payments',
+				'g_name'		=> 'Blockchain.info Receive Payments',
+				'g_settings'	=> 'a:5:{s:11:"wallet_addr";a:1:{s:4:"type";s:9:"formInput";}s:7:"show_qr";a:1:{s:4:"type";s:9:"formYesNo";}s:13:"use_online_ex";a:2:{s:4:"type";s:9:"formYesNo";s:7:"default";i:1;}s:11:"fixed_price";a:1:{s:4:"type";s:9:"formInput";}s:14:"confirn_number";a:2:{s:4:"type";s:9:"formInput";s:7:"default";i:6;}}',
+			), array('g_key'));
+		}
+		$this->cache->rebuildCache( 'pay_gateways', 'nexus' );
+	}
+	
+	public function uninstall() {
+		if($this->DB->checkForTable('nexus_gateways')) {
+			//I'm not sure about paymethods
+			$this->DB->delete('nexus_gateways', "g_key='bci_receive_payments'");
+		}
+		$this->cache->rebuildCache( 'pay_gateways', 'nexus' );
+	}
+}]]></source>
+    </file>
+  </hookextras_custom>
+  <hookextras_settings/>
+  <hookextras_language>
+    <language>
+      <word_app>nexus</word_app>
+      <word_pack>public_gateways</word_pack>
+      <word_key>gateway_title_bci_receive_payments_confirn_number</word_key>
+      <word_default>Confirmations Number</word_default>
+    </language>
+    <language>
+      <word_app>nexus</word_app>
+      <word_pack>public_gateways</word_pack>
+      <word_key>gateway_desc_bci_receive_payments_confirn_number</word_key>
+      <word_default>Confirm transactions after this number of confirmations</word_default>
+    </language>
+    <language>
+      <word_app>nexus</word_app>
+      <word_pack>public_gateways</word_pack>
+      <word_key>gateway_title_bci_receive_payments_use_online_ex</word_key>
+      <word_default>Use Online Exchange</word_default>
+    </language>
+    <language>
+      <word_app>nexus</word_app>
+      <word_pack>public_gateways</word_pack>
+      <word_key>gateway_title_bci_receive_payments_fixed_price</word_key>
+      <word_default>Fixed Price To Exchange</word_default>
+    </language>
+    <language>
+      <word_app>nexus</word_app>
+      <word_pack>public_gateways</word_pack>
+      <word_key>gateway_title_bci_receive_payments_wallet_addr</word_key>
+      <word_default>Wallet Address</word_default>
+    </language>
+    <language>
+      <word_app>nexus</word_app>
+      <word_pack>public_gateways</word_pack>
+      <word_key>gateway_title_bci_receive_payments_show_qr</word_key>
+      <word_default>Show QR Code?</word_default>
+    </language>
+    <language>
+      <word_app>nexus</word_app>
+      <word_pack>public_nexus</word_pack>
+      <word_key>sod_bci_send_payment</word_key>
+      <word_default><![CDATA[Please send <b>%s</b> To]]></word_default>
+    </language>
+  </hookextras_language>
+  <hookextras_modules/>
+  <hookextras_help/>
+  <hookextras_templates>
+    <templates>
+      <template_group>skin_nexus_payments</template_group>
+      <template_content><![CDATA[<p style="margin: 10px 0; text-align: center;" class="message unspecific">
+	<if test="$qr"><a onclick="window.open('http://chart.googleapis.com/chart?chs=250x250&&chld=H|0&cht=qr&chl=bitcoin:{$addr}?amount={$amount}', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=300,height=270'); return false;" href='http://chart.googleapis.com/chart?chs=250x250&&chld=H|0&cht=qr&chl=bitcoin:{$addr}?amount={$amount}'><img src='http://chart.googleapis.com/chart?chs=100x100&&chld=H|0&cht=qr&chl=bitcoin:{$addr}?amount={$amount}' /></a><br></if>
+	{parse expression="sprintf( $this->lang->words['sod_bci_send_payment'], $amount )"}:<br><b><a href="bitcoin:{$addr}?amount={$amount}">{$addr}</a></b>
+</p>]]></template_content>
+      <template_name>sod_bci_payment</template_name>
+      <template_data>$addr, $amount, $qr</template_data>
+      <template_updated>1389463612</template_updated>
+      <template_removable>0</template_removable>
+      <template_added_to>0</template_added_to>
+      <template_user_added>0</template_user_added>
+      <template_user_edited>0</template_user_edited>
+      <template_master_key>root</template_master_key>
+    </templates>
+  </hookextras_templates>
+  <hookextras_css/>
+  <hookextras_replacements/>
+  <hookextras_tasks/>
+  <hookextras_database_create/>
+  <hookextras_database_alter/>
+  <hookextras_database_update/>
+  <hookextras_database_insert/>
+</hookexport>
