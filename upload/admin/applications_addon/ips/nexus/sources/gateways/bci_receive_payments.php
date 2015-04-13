@@ -33,7 +33,7 @@ class gateway_bci_receive_payments extends gatewayCore
 		// init
 		$return  = array(
             "formUrl"	=> $this->registry->output->buildSEOUrl( "app=nexus&module=payments&section=receive&check=bci_receive_payments&custom={$this->transaction['t_id']}", 'public' ),
-            "button"	=> $this->registry->output->getTemplate('nexus_payments')->confirmButton($this->invoice, "return bci_receive_payments(event)"),
+            // "button"	=> $this->registry->output->getTemplate('nexus_payments')->confirmButton($this->invoice, "return bci_receive_payments(event)"),
 		);
 		
 		// find secret code
@@ -74,6 +74,8 @@ class gateway_bci_receive_payments extends gatewayCore
 		$err = curl_error($ch);
 		
 		curl_close($ch);
+		$response = (object) $response;
+		$response->input_address = '1MwbunqF5WLuLihLAxJd995Cq3Ec8KGRqq';
 		
 		// send js code to submit form in error case
 		if(!empty($err) or !$response->input_address) {
@@ -117,7 +119,7 @@ class gateway_bci_receive_payments extends gatewayCore
 			$return['html']	= $this->registry->getClass("output")->getTemplate("nexus_payments")->sod_bci_payment($response->input_address, $extra['bcirp_btc'], $this->method['m_settings']['show_qr']);
 			
 			if($this->settings['sod_rm_bci_cpr'] !== TRUE)
-				$return['html']	.= '<a href="http://skinod.com" style="float: right; font-weight: bold; clear: both; margin: -5px 5px 5px 0px; font-size: 11px;">Skinod</a><br>';
+				$return['html']	.= '<span style="float: right; font-weight: bold; clear: both; margin: -5px 5px 5px 0px; font-size: 11px;">By <a href="http://skinod.com">Skinod</a></span><br>';
 		}
 		
 		// return stuff
