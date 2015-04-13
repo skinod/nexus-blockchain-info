@@ -74,8 +74,6 @@ class gateway_bci_receive_payments extends gatewayCore
 		$err = curl_error($ch);
 		
 		curl_close($ch);
-		$response = (object) $response;
-		$response->input_address = '1MwbunqF5WLuLihLAxJd995Cq3Ec8KGRqq';
 		
 		// send js code to submit form in error case
 		if(!empty($err) or !$response->input_address) {
